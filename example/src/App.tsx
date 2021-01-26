@@ -3,7 +3,6 @@ import * as React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import AesGcmCrypto from 'react-native-aes-gcm-crypto';
 
-
 export default function App() {
   const [result, setResult] = React.useState<number | undefined>();
 
