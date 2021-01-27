@@ -77,6 +77,12 @@ function decrypt(
 
 See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
 
+## Author
+
+Takuya Matsuyama | [@inkdrop_app](https://twitter.com/inkdrop_app)
+
+Made for my app called [Inkdrop - A Markdown note-taking app](https://www.inkdrop.app/)
+
 ## License
 
 MIT
