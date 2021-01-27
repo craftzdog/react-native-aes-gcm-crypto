@@ -8,7 +8,7 @@ export type EncryptedData = {
 
 type AesGcmCryptoType = {
   decrypt(
-    base64CipherText: string,
+    base64Ciphertext: string,
     key: string,
     iv: string,
     tag: string,

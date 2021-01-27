@@ -3,7 +3,7 @@ import * as React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import AesGcmCrypto, { EncryptedData } from 'react-native-aes-gcm-crypto';
 
-const key = 'c8508f463f4e1a18bd5992ef71d8d279';
+const key = 'Yzg1MDhmNDYzZjRlMWExOGJkNTk5MmVmNzFkOGQyNzk=';
 
 export default function App() {
   const [decryptedData, setDecryptedData] = React.useState<

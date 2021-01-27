@@ -7,10 +7,7 @@ enum CryptoError: Error {
 
 @objc(AesGcmCrypto)
 class AesGcmCrypto: NSObject {
-    func decrypt(cipherData: Data, key: String, iv: String, tag: String) throws -> Data {
-        guard let keyData = key.data(using: .utf8) else {
-            throw CryptoError.runtimeError("Invalid key")
-        }
+    private func decrypt(cipherData: Data, key: Data, iv: String, tag: String) throws -> Data {
         guard let ivData = Data(hexString: iv) else {
             throw CryptoError.runtimeError("Invalid iv")
         }
@@ -18,7 +15,7 @@ class AesGcmCrypto: NSObject {
             throw CryptoError.runtimeError("Invalid tag")
         }
         
-        let skey = SymmetricKey(data: keyData)
+        let skey = SymmetricKey(data: key)
         let sealedBox = try AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: ivData),
                                                ciphertext: cipherData,
                                                tag: tagData)
@@ -26,19 +23,17 @@ class AesGcmCrypto: NSObject {
         return decryptedData
     }
 
-    func encrypt(plainData: Data, key: String) throws -> AES.GCM.SealedBox {
-        guard let keyData = key.data(using: .utf8) else {
-            throw CryptoError.runtimeError("Invalid key")
-        }
+    private func encrypt(plainData: Data, key: Data) throws -> AES.GCM.SealedBox {
         
-        let skey = SymmetricKey(data: keyData)
+        let skey = SymmetricKey(data: key)
         return try AES.GCM.seal(plainData, using: skey)
     }
 
     @objc(decrypt:withKey:iv:tag:isBinary:withResolver:withRejecter:)
     func decrypt(base64CipherText: String, key: String, iv: String, tag: String, isBinary: Bool, resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) -> Void {
         do {
-            let decryptedData = try self.decrypt(cipherData: Data(base64Encoded: base64CipherText)!, key: key, iv: iv, tag: tag)
+            let keyData = Data(base64Encoded: key)!
+            let decryptedData = try self.decrypt(cipherData: Data(base64Encoded: base64CipherText)!, key: keyData, iv: iv, tag: tag)
             
             if isBinary {
                 resolve(decryptedData.base64EncodedData())
@@ -55,8 +50,9 @@ class AesGcmCrypto: NSObject {
     @objc(encrypt:inBase64:withKey:withResolver:withRejecter:)
     func encrypt(plainText: String, inBase64: Bool, key: String, resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) -> Void {
         do {
+            let keyData = Data(base64Encoded: key)!
             let plainData = inBase64 ? Data(base64Encoded: plainText)! : plainText.data(using: .utf8)!
-            let sealedBox = try self.encrypt(plainData: plainData, key: key)
+            let sealedBox = try self.encrypt(plainData: plainData, key: keyData)
 
             let iv = sealedBox.nonce.withUnsafeBytes {
                 Data(Array($0)).hexadecimal

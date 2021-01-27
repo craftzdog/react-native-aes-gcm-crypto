@@ -19,13 +19,11 @@ class AesGcmCryptoModule(reactContext: ReactApplicationContext) : ReactContextBa
     return "AesGcmCrypto"
   }
 
-  private fun getSecretKeyFromString(keyStr: String): SecretKey {
-    val baKey = keyStr.toByteArray()
-    val key: SecretKey = SecretKeySpec(baKey, 0, baKey.size, "AES")
-    return key
+  private fun getSecretKeyFromString(key: ByteArray): SecretKey {
+    return SecretKeySpec(key, 0, key.size, "AES")
   }
 
-  fun decryptData(ciphertext: ByteArray, key: String, iv: String, tag: String): ByteArray {
+  fun decryptData(ciphertext: ByteArray, key: ByteArray, iv: String, tag: String): ByteArray {
     val secretKey: SecretKey = getSecretKeyFromString(key)
     val ivData = iv.hexStringToByteArray()
     val tagData = tag.hexStringToByteArray()
@@ -35,7 +33,7 @@ class AesGcmCryptoModule(reactContext: ReactApplicationContext) : ReactContextBa
     return cipher.doFinal(ciphertext + tagData)
   }
 
-  fun encryptData(plainData: ByteArray, key: String): EncryptionOutput {
+  fun encryptData(plainData: ByteArray, key: ByteArray): EncryptionOutput {
     val secretKey: SecretKey = getSecretKeyFromString(key)
 
     val cipher = Cipher.getInstance("AES/GCM/NoPadding")
@@ -55,8 +53,9 @@ class AesGcmCryptoModule(reactContext: ReactApplicationContext) : ReactContextBa
               isBinary: Boolean,
               promise: Promise) {
     try {
+      val keyData = Base64.getDecoder().decode(key)
       val ciphertext: ByteArray = Base64.getDecoder().decode(base64CipherText)
-      val unsealed: ByteArray = decryptData(ciphertext, key, iv, tag)
+      val unsealed: ByteArray = decryptData(ciphertext, keyData, iv, tag)
 
       if (isBinary) {
         promise.resolve(Base64.getEncoder().encodeToString(unsealed))
@@ -78,8 +77,9 @@ class AesGcmCryptoModule(reactContext: ReactApplicationContext) : ReactContextBa
               key: String,
               promise: Promise) {
     try {
+      val keyData = Base64.getDecoder().decode(key)
       val plainData = if (inBinary) Base64.getDecoder().decode(plainText) else plainText.toByteArray(Charsets.UTF_8)
-      val sealed = encryptData(plainData, key)
+      val sealed = encryptData(plainData, keyData)
       var response = WritableNativeMap()
       response.putString("iv", sealed.iv.toHex())
       response.putString("tag", sealed.tag.toHex())
