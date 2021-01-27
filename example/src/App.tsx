@@ -14,7 +14,6 @@ export default function App() {
   >();
 
   React.useEffect(() => {
-    /*
     AesGcmCrypto.decrypt(
       'LzpSalRKfL47H5rUhqvA',
       key,
@@ -22,7 +21,6 @@ export default function App() {
       '5baa85ff3e7eda3204744ec74b71d523',
       false
     ).then(setDecryptedData);
-    */
     AesGcmCrypto.encrypt('{"name":"Hoge"}', false, key)
       .then((result) => {
         setEncryptedData(result);
