@@ -2,6 +2,11 @@
 
 AES-GCM encryption/decryption for React Native
 
+## Requirements
+
+- iOS >= 13.0
+- Android >= 19
+
 ## Installation
 
 ```sh
@@ -11,12 +16,62 @@ npm install react-native-aes-gcm-crypto
 ## Usage
 
 ```js
-import AesGcmCrypto from "react-native-aes-gcm-crypto";
+import AesGcmCrypto from 'react-native-aes-gcm-crypto';
 
-// ...
+const key = 'Yzg1MDhmNDYzZjRlMWExOGJkNTk5MmVmNzFkOGQyNzk=';
 
-const result = await AesGcmCrypto.multiply(3, 7);
+AesGcmCrypto.decrypt(
+  'LzpSalRKfL47H5rUhqvA',
+  key,
+  '131348c0987c7eece60fc0bc',
+  '5baa85ff3e7eda3204744ec74b71d523',
+  false
+).then((decryptedData) => {
+  console.log(decryptedData);
+});
+
+AesGcmCrypto.encrypt('{"name":"Hoge"}', false, key).then((result) => {
+  console.log(result);
+});
 ```
+
+### Encrypt
+
+```ts
+type EncryptedData = {
+  iv: string;
+  tag: string;
+  content: string;
+};
+
+function encrypt(
+  plainText: string,
+  inBinary: boolean,
+  key: string
+): Promise<EncryptedData>;
+```
+
+- **plainText**: A string data to encrypt. If `inBinary` is `true`, it should be encoded in Base64.
+- **inBinary**: `true` to encrypt binary data encoded with Base64
+- **key**: AES key in Base64
+
+### Decrypt
+
+```ts
+function decrypt(
+  base64Ciphertext: string,
+  key: string,
+  iv: string,
+  tag: string,
+  isBinary: boolean
+): Promise<string>;
+```
+
+- **base64Ciphertext**: A base64 data to decrypt.
+- **key**: AES key in Base64
+- **iv**: An initialization vector
+- **tag**: An auth tag
+- **isBinary**: `true` to return decrypted data in Base64
 
 ## Contributing
 
