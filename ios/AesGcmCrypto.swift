@@ -36,7 +36,7 @@ class AesGcmCrypto: NSObject {
             let decryptedData = try self.decrypt(cipherData: Data(base64Encoded: base64CipherText)!, key: keyData, iv: iv, tag: tag)
             
             if isBinary {
-                resolve(decryptedData.base64EncodedData())
+                resolve(decryptedData.base64EncodedString())
             } else {
                 resolve(String(decoding: decryptedData, as: UTF8.self))
             }
