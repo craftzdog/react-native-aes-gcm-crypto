@@ -15,6 +15,7 @@
     "cpp",
     "react-native-aes-gcm-crypto.podspec",
     "!lib/typescript/example",
+    "!lib/typescript/benchmark",
     "!android/build",
     "!ios/build",
     "!**/__tests__",
@@ -52,7 +53,7 @@
     "@release-it/conventional-changelog": "^2.0.0",
     "@types/jest": "^26.0.0",
     "@types/react": "^16.9.19",
-    "@types/react-native": "0.62.13",
+    "@types/react-native": "0.63.25",
     "commitlint": "^11.0.0",
     "eslint": "^7.2.0",
     "eslint-config-prettier": "^7.0.0",
@@ -75,6 +76,7 @@
     "preset": "react-native",
     "modulePathIgnorePatterns": [
       "<rootDir>/example/node_modules",
+      "<rootDir>/benchmark/node_modules",
       "<rootDir>/lib/"
     ]
   },
@@ -127,7 +129,9 @@
   },
   "eslintIgnore": [
     "node_modules/",
-    "lib/"
+    "lib/",
+    "benchmark/src/base64.js",
+    "benchmark/shim.js"
   ],
   "prettier": {
     "quoteProps": "consistent",
