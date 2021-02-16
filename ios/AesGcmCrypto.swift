@@ -7,6 +7,10 @@ enum CryptoError: Error {
 
 @objc(AesGcmCrypto)
 class AesGcmCrypto: NSObject {
+    @objc static func requiresMainQueueSetup() -> Bool {
+        return false
+    }
+
     private func decrypt(cipherData: Data, key: Data, iv: String, tag: String) throws -> Data {
         guard let ivData = Data(hexString: iv) else {
             throw CryptoError.runtimeError("Invalid iv")
