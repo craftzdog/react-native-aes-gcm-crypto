@@ -14,11 +14,26 @@ type AesGcmCryptoType = {
     tag: string,
     isBinary: boolean
   ): Promise<string>;
+  decryptFile(
+    inputFilePath: string,
+    outputFilePath: string,
+    key: string,
+    iv: string,
+    tag: string
+  ): Promise<boolean>;
   encrypt(
     plainText: string,
     inBinary: boolean,
     key: string
   ): Promise<EncryptedData>;
+  encryptFile(
+    inputFilePath: string,
+    outputFilePath: string,
+    key: string
+  ): Promise<{
+    iv: string;
+    tag: string;
+  }>;
 };
 
 const { AesGcmCrypto } = NativeModules;

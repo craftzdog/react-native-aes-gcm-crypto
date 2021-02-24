@@ -35,7 +35,7 @@ AesGcmCrypto.encrypt('{"name":"Hoge"}', false, key).then((result) => {
 });
 ```
 
-### Encrypt
+### Encrypt data
 
 ```ts
 type EncryptedData = {
@@ -55,7 +55,24 @@ function encrypt(
 - **inBinary**: `true` to encrypt binary data encoded with Base64
 - **key**: AES key in Base64
 
-### Decrypt
+### Encrypt file
+
+```ts
+function encryptFile(
+  inputFilePath: string,
+  outputFilePath: string,
+  key: string
+): Promise<{
+  iv: string;
+  tag: string;
+}>;
+```
+
+- **inputFilePath**: A file path to encrypt
+- **outputFilePath**: An output file path
+- **key**: AES key in Base64
+
+### Decrypt data
 
 ```ts
 function decrypt(
@@ -68,6 +85,25 @@ function decrypt(
 ```
 
 - **base64Ciphertext**: A base64 data to decrypt.
+- **key**: AES key in Base64
+- **iv**: An initialization vector
+- **tag**: An auth tag
+- **isBinary**: `true` to return decrypted data in Base64
+
+### Decrypt file
+
+```ts
+function decrypt(
+  inputFilePath: string,
+  outputFilePath: string,
+  key: string,
+  iv: string,
+  tag: string
+): Promise<boolean>;
+```
+
+- **inputFilePath**: A file path to decrypt
+- **outputFilePath**: An output file path
 - **key**: AES key in Base64
 - **iv**: An initialization vector
 - **tag**: An auth tag

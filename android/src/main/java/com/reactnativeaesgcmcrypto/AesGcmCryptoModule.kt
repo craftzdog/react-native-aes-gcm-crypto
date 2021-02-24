@@ -1,6 +1,8 @@
 package com.reactnativeaesgcmcrypto
 
 import com.facebook.react.bridge.*
+import com.facebook.react.module.annotations.ReactModule
+import java.io.File
 import java.security.GeneralSecurityException
 import java.util.*
 import javax.crypto.Cipher
@@ -12,6 +14,7 @@ class EncryptionOutput(val iv: ByteArray,
                        val tag: ByteArray,
                        val ciphertext: ByteArray)
 
+@ReactModule(name = "AesGcmCrypto")
 class AesGcmCryptoModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
   val GCM_TAG_LENGTH = 16
 
@@ -23,6 +26,7 @@ class AesGcmCryptoModule(reactContext: ReactApplicationContext) : ReactContextBa
     return SecretKeySpec(key, 0, key.size, "AES")
   }
 
+  @Throws(javax.crypto.AEADBadTagException::class)
   fun decryptData(ciphertext: ByteArray, key: ByteArray, iv: String, tag: String): ByteArray {
     val secretKey: SecretKey = getSecretKeyFromString(key)
     val ivData = iv.hexStringToByteArray()
@@ -72,6 +76,29 @@ class AesGcmCryptoModule(reactContext: ReactApplicationContext) : ReactContextBa
   }
 
   @ReactMethod
+  fun decryptFile(inputFilePath: String,
+                  outputFilePath: String,
+                  key: String,
+                  iv: String,
+                  tag: String,
+                  promise: Promise) {
+    try {
+      val keyData = Base64.getDecoder().decode(key)
+      val ciphertext = File(inputFilePath).inputStream().readBytes()
+      val unsealed: ByteArray = decryptData(ciphertext, keyData, iv, tag)
+
+      File(outputFilePath).outputStream().write(unsealed)
+      promise.resolve(true)
+    } catch (e: javax.crypto.AEADBadTagException) {
+      promise.reject("DecryptionError", "Bad auth tag exception", e)
+    } catch (e: GeneralSecurityException) {
+      promise.reject("DecryptionError", "Failed to decrypt", e)
+    } catch (e: Exception) {
+      promise.reject("DecryptionError", "Unexpected error", e)
+    }
+  }
+
+  @ReactMethod
   fun encrypt(plainText: String,
               inBinary: Boolean,
               key: String,
@@ -92,4 +119,24 @@ class AesGcmCryptoModule(reactContext: ReactApplicationContext) : ReactContextBa
     }
   }
 
+  @ReactMethod
+  fun encryptFile(inputFilePath: String,
+                  outputFilePath: String,
+                  key: String,
+                  promise: Promise) {
+    try {
+      val keyData = Base64.getDecoder().decode(key)
+      val plainData = File(inputFilePath).inputStream().readBytes()
+      val sealed = encryptData(plainData, keyData)
+      File(outputFilePath).outputStream().write(sealed.ciphertext)
+      var response = WritableNativeMap()
+      response.putString("iv", sealed.iv.toHex())
+      response.putString("tag", sealed.tag.toHex())
+      promise.resolve(response)
+    } catch (e: GeneralSecurityException) {
+      promise.reject("EncryptionError", "Failed to encrypt", e)
+    } catch (e: Exception) {
+      promise.reject("EncryptionError", "Unexpected error", e)
+    }
+  }
 }
