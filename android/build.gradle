@@ -1,25 +1,37 @@
 buildscript {
-  // Buildscript is evaluated before everything else so we can't use getExtOrDefault
-  def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['AesGcmCrypto_kotlinVersion']
-
-  repositories {
-    google()
-    jcenter()
+  ext.getExtOrDefault = {name ->
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['AesGcmCrypto_' + name]
   }
 
-  dependencies {
-    classpath 'com.android.tools.build:gradle:3.2.1'
-    // noinspection DifferentKotlinGradleVersion
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  // Buildscript is evaluated before everything else so we can't use getExtOrDefault
+  def kotlin_version = getExtOrDefault('kotlinVersion')
+
+  // The Android Gradle plugin is only required when opening the android folder stand-alone.
+  // This avoids unnecessary downloads and potential conflicts when the library is included as a
+  // module dependency in an application project.
+  if (project == rootProject) {
+    repositories {
+      mavenCentral()
+      google()
+    }
+
+    dependencies {
+      classpath 'com.android.tools.build:gradle:4.2.2'
+      classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+  } else {
+    repositories {
+      mavenCentral()
+    }
+
+    dependencies {
+      classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
   }
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-
-def getExtOrDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['AesGcmCrypto_' + name]
-}
 
 def getExtOrIntegerDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties['AesGcmCrypto_' + name]).toInteger()
@@ -28,6 +40,8 @@ def getExtOrIntegerDefault(name) {
 android {
   compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
   buildToolsVersion getExtOrDefault('buildToolsVersion')
+  ndkVersion getExtOrDefault('ndkVersion')
+
   defaultConfig {
     minSdkVersion 26
     targetSdkVersion getExtOrIntegerDefault('targetSdkVersion')
