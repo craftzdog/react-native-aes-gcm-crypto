@@ -86,8 +86,8 @@ function decrypt(
 
 - **base64Ciphertext**: A base64 data to decrypt.
 - **key**: AES key in Base64
-- **iv**: An initialization vector
-- **tag**: An auth tag
+- **iv**: An initialization vector (or nonce) in Hex
+- **tag**: An auth tag in Hex
 - **isBinary**: `true` to return decrypted data in Base64
 
 ### Decrypt file
@@ -105,8 +105,8 @@ function decrypt(
 - **inputFilePath**: A file path to decrypt
 - **outputFilePath**: An output file path
 - **key**: AES key in Base64
-- **iv**: An initialization vector
-- **tag**: An auth tag
+- **iv**: An initialization vector (or nonce) in Hex
+- **tag**: An auth tag in Hex
 - **isBinary**: `true` to return decrypted data in Base64
 
 ## Contributing
