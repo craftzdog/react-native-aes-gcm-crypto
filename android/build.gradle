@@ -43,7 +43,7 @@ android {
   ndkVersion getExtOrDefault('ndkVersion')
 
   defaultConfig {
-    minSdkVersion 26
+    minSdkVersion 24
     targetSdkVersion getExtOrIntegerDefault('targetSdkVersion')
     versionCode 1
     versionName "1.0"

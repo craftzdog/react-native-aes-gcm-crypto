@@ -5,7 +5,7 @@ AES-GCM encryption/decryption for React Native
 ## Requirements
 
 - iOS >= 13.0
-- Android >= 26
+- Android >= 24
 
 ## Installation
 

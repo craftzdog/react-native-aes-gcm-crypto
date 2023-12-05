@@ -9,6 +9,8 @@ import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
+import android.os.Build
+import net.iharder.Base64
 
 class EncryptionOutput(val iv: ByteArray,
                        val tag: ByteArray,
@@ -57,12 +59,27 @@ class AesGcmCryptoModule(reactContext: ReactApplicationContext) : ReactContextBa
               isBinary: Boolean,
               promise: Promise) {
     try {
-      val keyData = Base64.getDecoder().decode(key)
-      val ciphertext: ByteArray = Base64.getDecoder().decode(base64CipherText)
+      val keyData: ByteArray
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        keyData = java.util.Base64.getDecoder().decode(key)
+      } else {
+        keyData = net.iharder.Base64.decode(key)
+      }
+
+      val ciphertext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        java.util.Base64.getDecoder().decode(base64CipherText)
+      } else {
+        net.iharder.Base64.decode(base64CipherText)
+      }
+
       val unsealed: ByteArray = decryptData(ciphertext, keyData, iv, tag)
 
       if (isBinary) {
-        promise.resolve(Base64.getEncoder().encodeToString(unsealed))
+        promise.resolve(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            java.util.Base64.getEncoder().encodeToString(unsealed)
+                        } else {
+                            net.iharder.Base64.encodeBytes(unsealed)
+                        })
       } else {
         promise.resolve(unsealed.toString(Charsets.UTF_8))
       }
@@ -83,7 +100,12 @@ class AesGcmCryptoModule(reactContext: ReactApplicationContext) : ReactContextBa
                   tag: String,
                   promise: Promise) {
     try {
-      val keyData = Base64.getDecoder().decode(key)
+      val keyData: ByteArray
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        keyData = java.util.Base64.getDecoder().decode(key)
+      } else {
+        keyData = net.iharder.Base64.decode(key)
+      }
       val ciphertext = File(inputFilePath).inputStream().readBytes()
       val unsealed: ByteArray = decryptData(ciphertext, keyData, iv, tag)
 
@@ -104,13 +126,33 @@ class AesGcmCryptoModule(reactContext: ReactApplicationContext) : ReactContextBa
               key: String,
               promise: Promise) {
     try {
-      val keyData = Base64.getDecoder().decode(key)
-      val plainData = if (inBinary) Base64.getDecoder().decode(plainText) else plainText.toByteArray(Charsets.UTF_8)
+      val keyData: ByteArray
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        keyData = java.util.Base64.getDecoder().decode(key)
+      } else {
+        keyData = net.iharder.Base64.decode(key)
+      }
+      val plainData: ByteArray
+      if (inBinary) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          plainData = java.util.Base64.getDecoder().decode(plainText)
+        } else {
+          plainData = net.iharder.Base64.decode(plainText)
+        }
+       } else {
+        plainData = plainText.toByteArray(Charsets.UTF_8)
+       }
       val sealed = encryptData(plainData, keyData)
       var response = WritableNativeMap()
       response.putString("iv", sealed.iv.toHex())
       response.putString("tag", sealed.tag.toHex())
-      response.putString("content", Base64.getEncoder().encodeToString(sealed.ciphertext))
+      val content:String
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        content = java.util.Base64.getEncoder().encodeToString(sealed.ciphertext)
+      } else {
+        content = net.iharder.Base64.encodeBytes(sealed.ciphertext)
+      }
+      response.putString("content", content)
       promise.resolve(response)
     } catch (e: GeneralSecurityException) {
       promise.reject("EncryptionError", "Failed to encrypt", e)
@@ -125,7 +167,12 @@ class AesGcmCryptoModule(reactContext: ReactApplicationContext) : ReactContextBa
                   key: String,
                   promise: Promise) {
     try {
-      val keyData = Base64.getDecoder().decode(key)
+      val keyData: ByteArray
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        keyData = java.util.Base64.getDecoder().decode(key)
+      } else {
+        keyData = net.iharder.Base64.decode(key)
+      }
       val plainData = File(inputFilePath).inputStream().readBytes()
       val sealed = encryptData(plainData, keyData)
       File(outputFilePath).outputStream().write(sealed.ciphertext)
