@@ -93,7 +93,7 @@ function decrypt(
 ### Decrypt file
 
 ```ts
-function decrypt(
+function decryptFile(
   inputFilePath: string,
   outputFilePath: string,
   key: string,
